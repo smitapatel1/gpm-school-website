@@ -43,39 +43,51 @@
 }
 
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
+  /* School Theme Colors */
+  --school-primary: #C62828;
+  --school-primary-light: #E53935;
+  --school-secondary: #FFF8E1;
+  --school-accent: #E53935;
+  --school-dark-text: #3E2723;
+  --school-light-bg: #FFFDF7;
+  --school-border: #D6D6D6;
+  --school-muted-text: #6B7280;
+  --school-highlight: #87CEEB;
+  --school-ground-accent: #E8D6B3;
+
+  --primary: #C62828;
+  --primary-foreground: #FFFDF7;
+  --sidebar-primary: #C62828;
+  --sidebar-primary-foreground: #FFFDF7;
+  --chart-1: #E53935;
+  --chart-2: #C62828;
+  --chart-3: #B71C1C;
+  --chart-4: #A01818;
+  --chart-5: #880E0E;
   --radius: 0.65rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.235 0.015 65);
+  --foreground: oklch(0.15 0.02 30);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.015 65);
+  --card-foreground: oklch(0.15 0.02 30);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.015 65);
-  --secondary: oklch(0.98 0.001 286.375);
-  --secondary-foreground: oklch(0.4 0.015 65);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
+  --popover-foreground: oklch(0.15 0.02 30);
+  --secondary: oklch(1 0 0);
+  --secondary-foreground: oklch(0.15 0.02 30);
+  --muted: oklch(0.95 0.001 0);
+  --muted-foreground: oklch(0.42 0.016 285.938);
+  --accent: #E53935;
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.623 0.214 259.815);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.235 0.015 65);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
+  --border: oklch(0.85 0.004 286.32);
+  --input: oklch(0.98 0.004 286.32);
+  --ring: #C62828;
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.15 0.02 30);
+  --sidebar-accent: #E53935;
+  --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
+  --sidebar-ring: #C62828;
 }
 
 .dark {
@@ -174,4 +186,141 @@
       max-width: 1280px; /* Standard content width */
     }
   }
+}
+
+/* School-specific custom styles */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 ease-out bg-[#C62828] text-white hover:bg-[#E53935] active:scale-95 px-6 py-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 ease-out bg-[#FFF8E1] text-[#3E2723] hover:bg-[#E8D6B3] active:scale-95 px-6 py-2;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 ease-out border-2 border-[#C62828] text-[#C62828] hover:bg-[#C62828] hover:text-white active:scale-95 px-6 py-2;
+  }
+
+  .card-base {
+    @apply rounded-xl bg-white text-[#3E2723] shadow-sm border border-[#D6D6D6];
+  }
+
+  .section-padding {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-[#3E2723] mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-lg text-[#6B7280] mb-8;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-[#C62828] to-[#E53935] bg-clip-text text-transparent;
+  }
+
+  .nav-link {
+    @apply relative text-[#3E2723] font-medium transition-colors duration-200 hover:text-[#C62828];
+  }
+
+  .nav-link::after {
+    @apply absolute bottom-0 left-0 h-0.5 w-0 bg-[#C62828] transition-all duration-300;
+    content: '';
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(198, 40, 40, 0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.slide-in-down {
+  animation: slideInDown 0.5s ease-out;
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .hide-mobile {
+    @apply hidden;
+  }
+}
+
+@media (min-width: 641px) {
+  .show-mobile {
+    @apply hidden;
+  }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  @apply bg-[#C62828] text-white;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[#FFFDF7];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[#C62828] rounded-full hover:bg-[#E53935];
 }

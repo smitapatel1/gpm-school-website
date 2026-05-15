@@ -4,6 +4,11 @@ import { LogOut, Menu, X, Users, FileText, Calendar, Image, MessageSquare, BarCh
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import schoolConfig from "@/config/school";
+import AdminAdmissions from "./AdminAdmissions";
+import AdminNotices from "./AdminNotices";
+import AdminEvents from "./AdminEvents";
+import AdminFaculty from "./AdminFaculty";
+import AdminContacts from "./AdminContacts";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -177,84 +182,24 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {activeTab === "admissions" && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-[#3E2723]">Manage Admissions</h2>
-                <button className="px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium">
-                  Add New
-                </button>
-              </div>
-              <div className="card-base p-6">
-                <p className="text-[#6B7280]">TODO: Admissions management interface</p>
-              </div>
-            </div>
-          )}
+          {activeTab === "admissions" && <AdminAdmissions />}
 
-          {activeTab === "notices" && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-[#3E2723]">Manage Notices</h2>
-                <button className="px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium">
-                  Add New Notice
-                </button>
-              </div>
-              <div className="card-base p-6">
-                <p className="text-[#6B7280]">TODO: Notices management interface</p>
-              </div>
-            </div>
-          )}
+          {activeTab === "notices" && <AdminNotices />}
 
-          {activeTab === "events" && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-[#3E2723]">Manage Events</h2>
-                <button className="px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium">
-                  Add New Event
-                </button>
-              </div>
-              <div className="card-base p-6">
-                <p className="text-[#6B7280]">TODO: Events management interface</p>
-              </div>
-            </div>
-          )}
+          {activeTab === "events" && <AdminEvents />}
 
           {activeTab === "gallery" && (
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-[#3E2723]">Manage Gallery</h2>
-                <button className="px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium">
-                  Upload Images
-                </button>
-              </div>
-              <div className="card-base p-6">
-                <p className="text-[#6B7280]">TODO: Gallery management interface</p>
+              <h2 className="text-xl font-bold text-[#3E2723] mb-6">Manage Gallery</h2>
+              <div className="card-base p-8 text-center">
+                <p className="text-[#6B7280]">Gallery upload feature coming soon</p>
               </div>
             </div>
           )}
 
-          {activeTab === "faculty" && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-[#3E2723]">Manage Faculty</h2>
-                <button className="px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium">
-                  Add Staff Member
-                </button>
-              </div>
-              <div className="card-base p-6">
-                <p className="text-[#6B7280]">TODO: Faculty management interface</p>
-              </div>
-            </div>
-          )}
+          {activeTab === "faculty" && <AdminFaculty />}
 
-          {activeTab === "contacts" && (
-            <div>
-              <h2 className="text-xl font-bold text-[#3E2723] mb-6">Contact Inquiries</h2>
-              <div className="card-base p-6">
-                <p className="text-[#6B7280]">TODO: Contact inquiries management interface</p>
-              </div>
-            </div>
-          )}
+          {activeTab === "contacts" && <AdminContacts />}
         </div>
       </div>
     </div>

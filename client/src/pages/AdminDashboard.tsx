@@ -9,6 +9,7 @@ import AdminNotices from "./AdminNotices";
 import AdminEvents from "./AdminEvents";
 import AdminFaculty from "./AdminFaculty";
 import AdminContacts from "./AdminContacts";
+import AdminGallery from "./AdminGallery";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -188,14 +189,7 @@ export default function AdminDashboard() {
 
           {activeTab === "events" && <AdminEvents />}
 
-          {activeTab === "gallery" && (
-            <div>
-              <h2 className="text-xl font-bold text-[#3E2723] mb-6">Manage Gallery</h2>
-              <div className="card-base p-8 text-center">
-                <p className="text-[#6B7280]">Gallery upload feature coming soon</p>
-              </div>
-            </div>
-          )}
+          {activeTab === "gallery" && <AdminGallery />}
 
           {activeTab === "faculty" && <AdminFaculty />}
 

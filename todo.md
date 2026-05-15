@@ -24,7 +24,7 @@
 - [x] Manage admissions (view, approve, reject, delete)
 - [x] Manage notices (create, edit, delete with PDF support)
 - [x] Manage events (create, edit, delete with dates and locations)
-- [ ] Manage gallery (upload images, organize by category) - OPTIONAL: Upload interface
+- [x] Manage gallery (upload images, organize by category with Firestore)
 - [x] Manage faculty (add, edit, delete staff profiles)
 
 ## Design & UX

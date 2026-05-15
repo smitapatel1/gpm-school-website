@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from "lucide-react";
 import schoolConfig from "@/config/school";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { setSEOTags, pageConfig } from "@/lib/seo";
 
 export default function Contact() {
+  useEffect(() => {
+    setSEOTags(pageConfig.contact);
+  }, []);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",

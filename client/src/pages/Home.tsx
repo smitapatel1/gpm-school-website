@@ -4,12 +4,15 @@ import { ArrowRight, BookOpen, Users, Award, Calendar, Bell, Zap } from "lucide-
 import schoolConfig from "@/config/school";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { setSEOTags, pageConfig, setSchemaMarkup, organizationSchema } from "@/lib/seo";
 
 export default function Home() {
   const [notices, setNotices] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
+    setSEOTags(pageConfig.home);
+    setSchemaMarkup(organizationSchema);
     // TODO: Fetch latest notices from Firestore
     // TODO: Fetch upcoming events from Firestore
   }, []);

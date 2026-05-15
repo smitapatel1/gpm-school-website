@@ -1,10 +1,16 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Award, Target, Heart, Users } from "lucide-react";
 import schoolConfig from "@/config/school";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { setSEOTags, pageConfig } from "@/lib/seo";
 
 export default function About() {
+  useEffect(() => {
+    setSEOTags(pageConfig.about);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#FFFDF7]">
       <Navbar />

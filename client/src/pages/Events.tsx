@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { setSEOTags, pageConfig } from "@/lib/seo";
 
 export default function Events() {
   const [events, setEvents] = useState<any[]>([]);
   const [selectedTab, setSelectedTab] = useState("upcoming");
 
   useEffect(() => {
+    setSEOTags(pageConfig.events);
     // TODO: Fetch events from Firestore
   }, []);
 

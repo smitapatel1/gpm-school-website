@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { setSEOTags, pageConfig } from "@/lib/seo";
 
 export default function Admissions() {
+  useEffect(() => {
+    setSEOTags(pageConfig.admissions);
+  }, []);
+
   const [formData, setFormData] = useState({
     studentName: "",
     parentName: "",

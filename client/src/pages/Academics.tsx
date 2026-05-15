@@ -1,8 +1,14 @@
+import { useState, useEffect } from "react";
 import { BookOpen, Clock, FileText } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { setSEOTags, pageConfig } from "@/lib/seo";
 
 export default function Academics() {
+  useEffect(() => {
+    setSEOTags(pageConfig.academics);
+  }, []);
+
   const classes = [
     { name: "Pre-Primary", medium: "English", description: "PG, LKG, UKG" },
     { name: "Primary", medium: "English & Hindi", description: "Classes 1-5" },

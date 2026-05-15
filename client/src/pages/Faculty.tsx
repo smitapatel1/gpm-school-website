@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Mail, Phone, Award } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { setSEOTags, pageConfig } from "@/lib/seo";
 
 export default function Faculty() {
   const [faculty, setFaculty] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
+    setSEOTags(pageConfig.faculty);
     // TODO: Fetch faculty from Firestore
   }, []);
 

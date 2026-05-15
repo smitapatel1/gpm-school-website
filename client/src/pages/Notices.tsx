@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Download, Calendar, Tag, Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { setSEOTags, pageConfig } from "@/lib/seo";
 
 export default function Notices() {
   const [notices, setNotices] = useState<any[]>([]);
@@ -9,6 +10,7 @@ export default function Notices() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
+    setSEOTags(pageConfig.notices);
     // TODO: Fetch notices from Firestore
   }, []);
 

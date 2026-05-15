@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LazyImage from "@/components/LazyImage";
+import { setSEOTags, pageConfig } from "@/lib/seo";
 
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -9,6 +11,7 @@ export default function Gallery() {
   const [images, setImages] = useState<any[]>([]);
 
   useEffect(() => {
+    setSEOTags(pageConfig.gallery);
     // TODO: Fetch gallery images from Firestore
   }, []);
 
@@ -83,7 +86,7 @@ export default function Gallery() {
                   className="group relative overflow-hidden rounded-xl cursor-pointer"
                   onClick={() => setSelectedImage(image)}
                 >
-                  <img
+                  <LazyImage
                     src={image.url}
                     alt={image.title}
                     className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
@@ -120,7 +123,7 @@ export default function Gallery() {
             >
               <X size={32} />
             </button>
-            <img
+            <LazyImage
               src={selectedImage.url}
               alt={selectedImage.title}
               className="w-full rounded-lg"

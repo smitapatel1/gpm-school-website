@@ -152,15 +152,21 @@ export default function Notices() {
                     </div>
 
                     {/* Download Button */}
-                    <a
-                      href={notice.pdfUrl}
-                      download
+                    <button
+                      onClick={() => {
+                        if (notice.pdfUrl && notice.pdfUrl !== "#") {
+                          const link = document.createElement("a");
+                          link.href = notice.pdfUrl;
+                          link.setAttribute("download", "");
+                          link.click();
+                        }
+                      }}
                       className="flex items-center gap-2 px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium whitespace-nowrap"
                     >
                       <Download size={18} />
                       <span className="hidden sm:inline">Download PDF</span>
                       <span className="sm:hidden">PDF</span>
-                    </a>
+                    </button>
                   </div>
                 </div>
               ))}

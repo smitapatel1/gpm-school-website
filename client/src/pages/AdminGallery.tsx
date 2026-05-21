@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
-import { Trash2, Upload, Loader2, X, Image as ImageIcon } from "lucide-react";
+import { Trash2, Upload, Loader2, X, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { db, storage } from "@/lib/firebase";
 import { collection, getDocs, addDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 interface GalleryImage {
   id: string;
   title: string;
   category: string;
   imageUrl?: string;
-  uploadedAt: any;
+  imagePath?: string;
+  uploadedAt?: any;
 }
 
 const categories = ["events", "sports", "academics", "cultural"];
@@ -104,6 +105,7 @@ export default function AdminGallery() {
           title: formData.title,
           category: formData.category,
           imageUrl,
+          imagePath,
           uploadedAt: Timestamp.now(),
         },
         ...prev,
@@ -120,10 +122,24 @@ export default function AdminGallery() {
   const deleteImage = async (id: string) => {
     if (confirm("Are you sure you want to delete this image?")) {
       try {
+        const image = gallery.find((g) => g.id === id);
+        
+        // Delete image from Firebase Storage if it exists
+        if (image?.imagePath) {
+          try {
+            const storageRef = ref(storage, image.imagePath);
+            await deleteObject(storageRef);
+          } catch (storageError) {
+            console.warn("Image file not found in storage, continuing with deletion:", storageError);
+          }
+        }
+        
+        // Delete gallery item from Firestore
         await deleteDoc(doc(db, "gallery", id));
         setGallery((prev) => prev.filter((img) => img.id !== id));
       } catch (error) {
         console.error("Error deleting image:", error);
+        alert("Error deleting image. Please try again.");
       }
     }
   };

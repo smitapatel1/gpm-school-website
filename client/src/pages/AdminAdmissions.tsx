@@ -11,6 +11,8 @@ interface Admission {
   phone: string;
   address: string;
   email?: string;
+  studentPhotoUrl?: string;
+  studentPhotoPath?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: any;
 }
@@ -19,6 +21,8 @@ export default function AdminAdmissions() {
   const [admissions, setAdmissions] = useState<Admission[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAdmission, setSelectedAdmission] = useState<Admission | null>(null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [photoModalAdmission, setPhotoModalAdmission] = useState<Admission | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved" | "rejected">("all");
 
   useEffect(() => {
@@ -39,6 +43,11 @@ export default function AdminAdmissions() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openPhotoModal = (admission: Admission) => {
+    setPhotoModalAdmission(admission);
+    setShowPhotoModal(true);
   };
 
   const updateStatus = async (id: string, newStatus: "approved" | "rejected") => {
@@ -135,7 +144,18 @@ export default function AdminAdmissions() {
                 {filteredAdmissions.map((admission) => (
                   <tr key={admission.id} className="border-b border-[#D6D6D6] hover:bg-[#FFFDF7]">
                     <td className="px-6 py-4 text-sm text-[#3E2723] font-medium">
-                      {admission.studentName}
+                      <div className="flex items-center gap-3">
+                        {admission.studentPhotoUrl && (
+                          <img
+                            src={admission.studentPhotoUrl}
+                            alt={admission.studentName}
+                            className="w-10 h-10 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-[#C62828]"
+                            onClick={() => openPhotoModal(admission)}
+                            title="Click to view full photo"
+                          />
+                        )}
+                        <span>{admission.studentName}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-[#6B7280]">{admission.class}</td>
                     <td className="px-6 py-4 text-sm text-[#6B7280]">{admission.phone}</td>
@@ -150,6 +170,15 @@ export default function AdminAdmissions() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
+                        {admission.studentPhotoUrl ? (
+                        <button
+                          onClick={() => openPhotoModal(admission)}
+                          className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition-colors"
+                          title="View student photo"
+                        >
+                          <Eye size={18} />
+                        </button>
+                      ) : (
                         <button
                           onClick={() => setSelectedAdmission(admission)}
                           className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition-colors"
@@ -157,6 +186,7 @@ export default function AdminAdmissions() {
                         >
                           <Eye size={18} />
                         </button>
+                      )}
                         {admission.status === "pending" && (
                           <>
                             <button
@@ -188,6 +218,30 @@ export default function AdminAdmissions() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Preview Modal */}
+      {showPhotoModal && photoModalAdmission?.studentPhotoUrl && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-[#3E2723]">{photoModalAdmission.studentName}'s Photo</h3>
+              <button
+                onClick={() => setShowPhotoModal(false)}
+                className="text-[#6B7280] hover:text-[#3E2723] text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="flex justify-center">
+              <img
+                src={photoModalAdmission.studentPhotoUrl}
+                alt={photoModalAdmission.studentName}
+                className="max-w-full max-h-96 rounded-lg object-cover"
+              />
+            </div>
           </div>
         </div>
       )}

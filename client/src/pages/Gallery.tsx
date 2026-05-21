@@ -1,43 +1,84 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LazyImage from "@/components/LazyImage";
 import { setSEOTags, pageConfig } from "@/lib/seo";
 
+interface GalleryImage {
+  id: string;
+  title: string;
+  category: string;
+  imageUrl: string;
+  uploadedAt: any;
+}
+
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedImage, setSelectedImage] = useState<any>(null);
-  const [images, setImages] = useState<any[]>([]);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setSEOTags(pageConfig.gallery);
-    // TODO: Fetch gallery images from Firestore
+    fetchGalleryData();
   }, []);
 
-  const categories = [
-    { id: "all", label: "All", icon: "🎨" },
-    { id: "events", label: "Events", icon: "🎉" },
-    { id: "sports", label: "Sports", icon: "⚽" },
-    { id: "academics", label: "Academics", icon: "📚" },
-    { id: "cultural", label: "Cultural", icon: "🎭" },
-  ];
+  const fetchGalleryData = async () => {
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(collection(db, "gallery"));
+      const galleryImages: GalleryImage[] = [];
+      const uniqueCategories = new Set<string>();
 
-  // Placeholder images
-  const placeholderImages = [
-    { id: 1, category: "events", title: "Annual Day Celebration", url: "https://via.placeholder.com/400x300?text=Annual+Day" },
-    { id: 2, category: "sports", title: "Sports Day", url: "https://via.placeholder.com/400x300?text=Sports+Day" },
-    { id: 3, category: "academics", title: "Science Exhibition", url: "https://via.placeholder.com/400x300?text=Science+Exhibition" },
-    { id: 4, category: "cultural", title: "Cultural Program", url: "https://via.placeholder.com/400x300?text=Cultural+Program" },
-    { id: 5, category: "events", title: "School Assembly", url: "https://via.placeholder.com/400x300?text=School+Assembly" },
-    { id: 6, category: "sports", title: "Cricket Tournament", url: "https://via.placeholder.com/400x300?text=Cricket" },
-  ];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.imageUrl) {
+          galleryImages.push({
+            id: doc.id,
+            title: data.title || "Untitled",
+            category: data.category || "events",
+            imageUrl: data.imageUrl,
+            uploadedAt: data.uploadedAt,
+          });
+          if (data.category) {
+            uniqueCategories.add(data.category);
+          }
+        }
+      });
 
-  const displayImages = images.length > 0 ? images : placeholderImages;
+      setImages(galleryImages.sort((a, b) => b.uploadedAt?.toDate?.() - a.uploadedAt?.toDate?.() || 0));
+
+      // Set categories from Firestore data
+      if (uniqueCategories.size > 0) {
+        setCategories(Array.from(uniqueCategories).sort());
+      } else {
+        // Fallback to default categories
+        setCategories(["events", "sports", "academics", "cultural"]);
+      }
+    } catch (error) {
+      console.error("Error fetching gallery:", error);
+      // Fallback to default categories on error
+      setCategories(["events", "sports", "academics", "cultural"]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categoryIcons: Record<string, string> = {
+    events: "🎉",
+    sports: "⚽",
+    academics: "📚",
+    cultural: "🎭",
+  };
+
   const filteredImages =
     selectedCategory === "all"
-      ? displayImages
-      : displayImages.filter((img) => img.category === selectedCategory);
+      ? images
+      : images.filter((img) => img.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-[#FFFDF7]">
@@ -54,31 +95,48 @@ export default function Gallery() {
       </section>
 
       {/* Category Filter */}
-      <section className="py-12 bg-white border-b border-[#D6D6D6]">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap gap-4 justify-center">
-            {categories.map((cat) => (
+      {!loading && (
+        <section className="py-12 bg-white border-b border-[#D6D6D6]">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-wrap gap-4 justify-center">
               <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => setSelectedCategory("all")}
                 className={`px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                  selectedCategory === cat.id
+                  selectedCategory === "all"
                     ? "bg-[#C62828] text-white"
                     : "bg-[#FFF8E1] text-[#3E2723] hover:bg-[#E8D6B3]"
                 }`}
               >
-                <span>{cat.icon}</span>
-                {cat.label}
+                <span>🎨</span>
+                All
               </button>
-            ))}
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2 capitalize ${
+                    selectedCategory === cat
+                      ? "bg-[#C62828] text-white"
+                      : "bg-[#FFF8E1] text-[#3E2723] hover:bg-[#E8D6B3]"
+                  }`}
+                >
+                  <span>{categoryIcons[cat] || "📷"}</span>
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Gallery Grid */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
-          {filteredImages.length > 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="animate-spin text-[#C62828]" size={40} />
+            </div>
+          ) : filteredImages.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredImages.map((image) => (
                 <div
@@ -87,13 +145,14 @@ export default function Gallery() {
                   onClick={() => setSelectedImage(image)}
                 >
                   <LazyImage
-                    src={image.url}
+                    src={image.imageUrl}
                     alt={image.title}
                     className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-end">
                     <div className="w-full p-4 bg-gradient-to-t from-black/80 to-transparent text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <p className="font-semibold">{image.title}</p>
+                      <p className="text-sm text-white/80 capitalize">{image.category}</p>
                     </div>
                   </div>
                 </div>
@@ -124,12 +183,13 @@ export default function Gallery() {
               <X size={32} />
             </button>
             <LazyImage
-              src={selectedImage.url}
+              src={selectedImage.imageUrl}
               alt={selectedImage.title}
               className="w-full rounded-lg"
             />
             <div className="mt-4 text-white text-center">
               <h3 className="text-2xl font-bold">{selectedImage.title}</h3>
+              <p className="text-white/80 capitalize mt-2">{selectedImage.category}</p>
             </div>
           </div>
         </div>
@@ -141,23 +201,25 @@ export default function Gallery() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold text-[#C62828] mb-2">
-                {displayImages.length}
+                {images.length}
               </div>
               <p className="text-[#6B7280]">Total Photos</p>
             </div>
             <div>
-              <div className="text-4xl font-bold text-[#C62828] mb-2">5</div>
+              <div className="text-4xl font-bold text-[#C62828] mb-2">
+                {categories.length + 1}
+              </div>
               <p className="text-[#6B7280]">Categories</p>
             </div>
             <div>
               <div className="text-4xl font-bold text-[#C62828] mb-2">
-                {displayImages.filter((img) => img.category === "events").length}
+                {images.filter((img) => img.category === "events").length}
               </div>
               <p className="text-[#6B7280]">Events</p>
             </div>
             <div>
               <div className="text-4xl font-bold text-[#C62828] mb-2">
-                {displayImages.filter((img) => img.category === "sports").length}
+                {images.filter((img) => img.category === "sports").length}
               </div>
               <p className="text-[#6B7280]">Sports</p>
             </div>

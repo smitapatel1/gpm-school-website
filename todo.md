@@ -75,7 +75,7 @@
 - [x] Upload to Firebase Storage with timestamp naming
 - [x] Save studentPhotoUrl and studentPhotoPath to Firestore (ready for integration)
 - [x] Show success/error messages
-- [ ] Display photo in admin admissions list with preview modal (TODO: Admin integration)
+- [x] Display photo in admin admissions list with preview modal (AdminAdmissions integration complete)
 
 ### 4. Contact Page Google Maps
 - [x] Embed responsive Google Maps iframe
@@ -91,7 +91,7 @@
 
 ### 6. Gallery Category Filter Fix
 - [x] Gallery filtering logic already working (events, sports, academics, cultural, all)
-- [ ] Fetch categories dynamically from Firestore (TODO: Firestore integration)
+- [x] Fetch categories dynamically from Firestore (Gallery Firestore integration complete)
 - [x] Ensure "All" category always available
 - [x] Smooth filtering animation with button states
 - [x] Verify lightbox works after filtering
@@ -103,7 +103,7 @@
 - [x] Save metadata to Firestore (title, imageUrl, imagePath, category, uploadedAt)
 - [x] Add progress indicator during upload
 - [x] Implement delete support
-- [ ] Delete image from Storage when document deleted (TODO: Storage cleanup)
+- [x] Delete image from Storage when document deleted (AdminGallery Storage cleanup complete)
 
 ### 8. Static Image Placeholders
 - [x] Images handled via Firebase Storage (no local placeholders needed)

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Trash2, Edit2, Plus, Loader2, X } from "lucide-react";
 import { db, storage } from "@/lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 interface Notice {
   id: string;
@@ -122,10 +122,24 @@ export default function AdminNotices() {
   const deleteNotice = async (id: string) => {
     if (confirm("Are you sure you want to delete this notice?")) {
       try {
+        const notice = notices.find((n) => n.id === id);
+        
+        // Delete PDF from Firebase Storage if it exists
+        if (notice?.pdfPath) {
+          try {
+            const storageRef = ref(storage, notice.pdfPath);
+            await deleteObject(storageRef);
+          } catch (storageError) {
+            console.warn("PDF file not found in storage, continuing with deletion:", storageError);
+          }
+        }
+        
+        // Delete notice from Firestore
         await deleteDoc(doc(db, "notices", id));
         setNotices((prev) => prev.filter((n) => n.id !== id));
       } catch (error) {
         console.error("Error deleting notice:", error);
+        alert("Error deleting notice. Please try again.");
       }
     }
   };
@@ -146,6 +160,17 @@ export default function AdminNotices() {
     setFormData({ title: "", description: "", category: "general", pdfUrl: "", pdfFile: null });
     setEditingId(null);
     setShowForm(false);
+  };
+
+  const handleDeleteWithConfirm = (id: string) => {
+    const notice = notices.find((n) => n.id === id);
+    const message = notice?.pdfName 
+      ? `Delete notice "${notice.title}" and its PDF file?`
+      : `Delete notice "${notice?.title}"?`;
+    
+    if (confirm(message)) {
+      deleteNotice(id);
+    }
   };
 
   return (
@@ -307,12 +332,12 @@ export default function AdminNotices() {
                   >
                     <Edit2 size={18} />
                   </button>
-                  <button
-                    onClick={() => deleteNotice(notice.id)}
-                    className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition-colors"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                <button
+                  onClick={() => handleDeleteWithConfirm(notice.id)}
+                  className="text-[#C62828] hover:text-[#E53935] transition-colors"
+                >
+                  <Trash2 size={18} />
+                </button>
                 </div>
               </div>
             </div>

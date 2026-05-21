@@ -115,7 +115,7 @@
 - [x] PDF save to Firebase Storage with category-based paths
 - [x] pdfUrl, pdfPath, pdfName saved to Firestore
 - [x] Download button on public notices page (working)
-- [ ] PDF deletion from Storage when notice deleted (TODO: Storage cleanup)
+- [x] PDF deletion from Storage when notice deleted (Firebase Storage cleanup implemented)
 - [x] PDF file type validation (.pdf only) and max size (10 MB)
 
 ### 10. Testing & Quality Assurance

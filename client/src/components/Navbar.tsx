@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Menu, X, Phone, MessageCircle } from "lucide-react";
+import { Menu, X, Phone, FileText, Mail, Instagram } from "lucide-react";
 import schoolConfig from "@/config/school";
 
 export default function Navbar() {
@@ -105,7 +105,7 @@ export default function Navbar() {
           {/* Admission Button */}
           <Link href="/admissions">
             <a className="flex flex-col items-center gap-1 px-4 py-2 text-[#C62828] hover:bg-[#FFF8E1] rounded-lg transition-colors flex-1">
-              <MessageCircle size={20} />
+              <FileText size={20} />
               <span className="text-xs font-medium">Admission</span>
             </a>
           </Link>
@@ -113,7 +113,7 @@ export default function Navbar() {
           {/* Contact Button */}
           <Link href="/contact">
             <a className="flex flex-col items-center gap-1 px-4 py-2 text-[#C62828] hover:bg-[#FFF8E1] rounded-lg transition-colors flex-1">
-              <MessageCircle size={20} />
+              <Mail size={20} />
               <span className="text-xs font-medium">Contact</span>
             </a>
           </Link>
@@ -125,9 +125,24 @@ export default function Navbar() {
             rel="noopener noreferrer"
             className="flex flex-col items-center gap-1 px-4 py-2 text-[#25D366] hover:bg-[#FFF8E1] rounded-lg transition-colors flex-1"
           >
-            <MessageCircle size={20} />
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-5.031 1.378c-1.557.821-2.816 2.088-3.604 3.616-1.202 2.257-.629 4.953 1.213 6.617.925.78 2.21 1.227 3.393 1.227a5.5 5.5 0 001.5-.203c1.557-.821 2.816-2.088 3.604-3.616 1.202-2.257.629-4.953-1.213-6.617-.925-.78-2.21-1.227-3.393-1.227m5.84-3.65c-1.202 0-2.429.194-3.58.574-2.237.747-4.102 2.128-5.38 3.899C.566 6.026.073 8.25.565 10.228c.492 1.978 1.793 3.591 3.365 4.922 1.572 1.33 3.6 2.096 5.786 2.096.992 0 1.923-.134 2.799-.396 2.237-.747 4.102-2.128 5.38-3.899 1.278-1.771 1.771-3.995 1.279-5.973-.492-1.978-1.793-3.591-3.365-4.922C19.661.756 17.633-.01 15.447-.01z"/>
+            </svg>
             <span className="text-xs font-medium">WhatsApp</span>
           </a>
+
+          {/* Instagram Button - Only show if URL is configured */}
+          {schoolConfig.social.instagram && (
+            <a
+              href={schoolConfig.social.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-1 px-4 py-2 text-[#E1306C] hover:bg-[#FFF8E1] rounded-lg transition-colors flex-1"
+            >
+              <Instagram size={20} />
+              <span className="text-xs font-medium">Instagram</span>
+            </a>
+          )}
         </div>
       </div>
 

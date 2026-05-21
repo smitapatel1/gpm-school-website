@@ -7,6 +7,7 @@ interface Faculty {
   id: string;
   name: string;
   designation: string;
+  category?: string;
   subject?: string;
   photoUrl?: string;
   email?: string;
@@ -24,6 +25,7 @@ export default function AdminFaculty() {
   const [formData, setFormData] = useState({
     name: "",
     designation: "",
+    category: "teachers",
     subject: "",
     email: "",
     phone: "",
@@ -94,6 +96,7 @@ export default function AdminFaculty() {
     setFormData({
       name: member.name,
       designation: member.designation,
+      category: member.category || "teachers",
       subject: member.subject || "",
       email: member.email || "",
       phone: member.phone || "",
@@ -109,6 +112,7 @@ export default function AdminFaculty() {
     setFormData({
       name: "",
       designation: "",
+      category: "teachers",
       subject: "",
       email: "",
       phone: "",
@@ -164,11 +168,32 @@ export default function AdminFaculty() {
                 </label>
                 <input
                   type="text"
+                  placeholder="e.g., Teacher, Principal"
                   value={formData.designation}
-                  onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, designation: e.target.value })
+                  }
                   required
                   className="w-full px-3 py-2 border border-[#D6D6D6] rounded-lg focus:outline-none focus:border-[#C62828] text-sm"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#3E2723] mb-1">
+                  Category *
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-[#D6D6D6] rounded-lg focus:outline-none focus:border-[#C62828] text-sm"
+                >
+                  <option value="teachers">Teachers</option>
+                  <option value="management">Management</option>
+                  <option value="office_staff">Office Staff</option>
+                  <option value="support_staff">Support Staff</option>
+                </select>
               </div>
 
               <div>
@@ -179,6 +204,7 @@ export default function AdminFaculty() {
                   type="text"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  placeholder="e.g., Mathematics"
                   className="w-full px-3 py-2 border border-[#D6D6D6] rounded-lg focus:outline-none focus:border-[#C62828] text-sm"
                 />
               </div>
@@ -270,6 +296,11 @@ export default function AdminFaculty() {
                 <div>
                   <h4 className="text-lg font-bold text-[#3E2723]">{member.name}</h4>
                   <p className="text-sm text-[#C62828] font-semibold">{member.designation}</p>
+                  {member.category && (
+                    <p className="text-xs text-[#6B7280] mt-1 capitalize">
+                      {member.category.replace(/_/g, " ")}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <button

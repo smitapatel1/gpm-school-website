@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, Upload, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { setSEOTags, pageConfig } from "@/lib/seo";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 
 export default function Admissions() {
   useEffect(() => {
@@ -16,7 +18,9 @@ export default function Admissions() {
     phone: "",
     address: "",
     email: "",
+    studentPhoto: null as File | null,
   });
+  const [studentPhotoPreview, setStudentPhotoPreview] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,14 +33,72 @@ export default function Admissions() {
     }));
   };
 
+  const handlePhotoChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      setError("Please upload a valid image file (JPG, PNG, or WEBP)");
+      return;
+    }
+
+    // Validate file size (max 5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File size must be less than 5 MB");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      studentPhoto: file,
+    }));
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setStudentPhotoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    setError("");
+  };
+
+  const removePhoto = () => {
+    setFormData((prev) => ({
+      ...prev,
+      studentPhoto: null,
+    }));
+    setStudentPhotoPreview(null);
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // TODO: Submit form to Firestore
+      let studentPhotoUrl = "";
+      let studentPhotoPath = "";
+
+      // Upload photo to Firebase Storage if provided
+      if (formData.studentPhoto) {
+        const timestamp = Date.now();
+        const fileName = `admissions/${timestamp}_${formData.studentPhoto.name}`;
+        const storageRef = ref(storage, fileName);
+        await uploadBytes(storageRef, formData.studentPhoto);
+        studentPhotoUrl = await getDownloadURL(storageRef);
+        studentPhotoPath = fileName;
+      }
+
+      // TODO: Submit form data to Firestore with photo URL and path
       // TODO: Send email notifications to admin and applicant
+      console.log("Form submitted with photo:", {
+        ...formData,
+        studentPhotoUrl,
+        studentPhotoPath,
+      });
+      
       setSubmitted(true);
       setFormData({
         studentName: "",
@@ -45,9 +107,12 @@ export default function Admissions() {
         phone: "",
         address: "",
         email: "",
+        studentPhoto: null,
       });
+      setStudentPhotoPreview(null);
     } catch (err) {
       setError("Failed to submit form. Please try again.");
+      console.error("Admission form error:", err);
     } finally {
       setLoading(false);
     }
@@ -299,6 +364,41 @@ export default function Admissions() {
                     className="w-full px-4 py-2 border border-[#D6D6D6] rounded-lg focus:outline-none focus:border-[#C62828] transition-colors resize-none"
                     placeholder="Enter full address"
                   />
+                </div>
+
+                {/* Student Photo Upload */}
+                <div>
+                  <label className="block text-sm font-semibold text-[#3E2723] mb-2">
+                    Student Photo (Optional)
+                  </label>
+                  {studentPhotoPreview ? (
+                    <div className="relative inline-block">
+                      <img
+                        src={studentPhotoPreview}
+                        alt="Student preview"
+                        className="w-32 h-32 object-cover rounded-lg border-2 border-[#C62828]"
+                      />
+                      <button
+                        type="button"
+                        onClick={removePhoto}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700 transition-colors"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full px-4 py-8 border-2 border-dashed border-[#D6D6D6] rounded-lg cursor-pointer hover:border-[#C62828] hover:bg-[#FFF8E1] transition-colors">
+                      <Upload size={32} className="text-[#C62828] mb-2" />
+                      <span className="text-sm font-medium text-[#3E2723]">Click to upload photo</span>
+                      <span className="text-xs text-[#6B7280] mt-1">JPG, PNG, or WEBP (Max 5 MB)</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        onChange={handlePhotoChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
 
                 {/* Submit Button */}

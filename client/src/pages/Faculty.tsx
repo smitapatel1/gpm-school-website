@@ -13,12 +13,13 @@ export default function Faculty() {
     // TODO: Fetch faculty from Firestore
   }, []);
 
-  // Placeholder faculty data
+  // Placeholder faculty data with category field
   const placeholderFaculty = [
     {
       id: 1,
       name: "Dr. Rajesh Kumar",
       designation: "Senior Teacher",
+      category: "teachers",
       subject: "Mathematics",
       qualification: "M.Sc, B.Ed",
       experience: "15 years",
@@ -29,6 +30,7 @@ export default function Faculty() {
       id: 2,
       name: "Mrs. Priya Singh",
       designation: "Teacher",
+      category: "teachers",
       subject: "English",
       qualification: "M.A, B.Ed",
       experience: "10 years",
@@ -39,6 +41,7 @@ export default function Faculty() {
       id: 3,
       name: "Mr. Amit Patel",
       designation: "Teacher",
+      category: "teachers",
       subject: "Science",
       qualification: "B.Sc, B.Ed",
       experience: "8 years",
@@ -49,15 +52,80 @@ export default function Faculty() {
       id: 4,
       name: "Ms. Neha Sharma",
       designation: "Teacher",
+      category: "teachers",
       subject: "Hindi",
       qualification: "M.A, B.Ed",
       experience: "7 years",
       email: "neha@gpmschool.com",
       phone: "9876543213",
     },
+    {
+      id: 5,
+      name: "Mr. Vikram Singh",
+      designation: "Principal",
+      category: "management",
+      qualification: "M.A, B.Ed, M.Ed",
+      experience: "20 years",
+      email: "principal@gpmschool.com",
+      phone: "9876543214",
+    },
+    {
+      id: 6,
+      name: "Mrs. Anjali Verma",
+      designation: "Vice Principal",
+      category: "management",
+      qualification: "M.Sc, B.Ed",
+      experience: "18 years",
+      email: "vp@gpmschool.com",
+      phone: "9876543215",
+    },
+    {
+      id: 7,
+      name: "Mr. Ravi Kumar",
+      designation: "Office Manager",
+      category: "office_staff",
+      qualification: "B.Com",
+      experience: "12 years",
+      email: "office@gpmschool.com",
+      phone: "9876543216",
+    },
+    {
+      id: 8,
+      name: "Ms. Divya Patel",
+      designation: "Receptionist",
+      category: "office_staff",
+      qualification: "12th Pass",
+      experience: "5 years",
+      email: "reception@gpmschool.com",
+      phone: "9876543217",
+    },
+    {
+      id: 9,
+      name: "Mr. Suresh",
+      designation: "Maintenance Staff",
+      category: "support_staff",
+      qualification: "10th Pass",
+      experience: "8 years",
+      phone: "9876543218",
+    },
+    {
+      id: 10,
+      name: "Mrs. Lakshmi",
+      designation: "Cleaning Staff",
+      category: "support_staff",
+      qualification: "10th Pass",
+      experience: "6 years",
+      phone: "9876543219",
+    },
   ];
 
   const displayFaculty = faculty.length > 0 ? faculty : placeholderFaculty;
+
+  // Filter faculty by category
+  const filteredFaculty = displayFaculty.filter((member) => {
+    if (filter === "all") return true;
+    return member.category === filter;
+  });
 
   return (
     <div className="min-h-screen bg-[#FFFDF7]">
@@ -85,41 +153,30 @@ export default function Faculty() {
 
           {/* Filter Tabs */}
           <div className="flex flex-wrap gap-2 justify-center mb-12">
-            <button
-              onClick={() => setFilter("all")}
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                filter === "all"
-                  ? "bg-[#C62828] text-white"
-                  : "bg-[#FFF8E1] text-[#3E2723] hover:bg-[#E8D6B3]"
-              }`}
-            >
-              All Staff
-            </button>
-            <button
-              onClick={() => setFilter("teacher")}
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                filter === "teacher"
-                  ? "bg-[#C62828] text-white"
-                  : "bg-[#FFF8E1] text-[#3E2723] hover:bg-[#E8D6B3]"
-              }`}
-            >
-              Teachers
-            </button>
-            <button
-              onClick={() => setFilter("admin")}
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                filter === "admin"
-                  ? "bg-[#C62828] text-white"
-                  : "bg-[#FFF8E1] text-[#3E2723] hover:bg-[#E8D6B3]"
-              }`}
-            >
-              Administration
-            </button>
+            {[
+              { id: "all", label: "All Staff" },
+              { id: "teachers", label: "Teachers" },
+              { id: "management", label: "Management" },
+              { id: "office_staff", label: "Office Staff" },
+              { id: "support_staff", label: "Support Staff" },
+            ].map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setFilter(category.id)}
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  filter === category.id
+                    ? "bg-[#C62828] text-white shadow-lg"
+                    : "bg-[#FFF8E1] text-[#3E2723] hover:bg-[#E8D6B3]"
+                }`}
+              >
+                {category.label}
+              </button>
+            ))}
           </div>
 
           {/* Faculty Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayFaculty.map((member) => (
+            {filteredFaculty.map((member) => (
               <div
                 key={member.id}
                 className="card-base overflow-hidden hover:shadow-lg transition-all duration-300"
@@ -180,9 +237,9 @@ export default function Faculty() {
             ))}
           </div>
 
-          {displayFaculty.length === 0 && (
+          {filteredFaculty.length === 0 && (
             <div className="text-center py-12 text-[#6B7280]">
-              No faculty members found
+              No faculty members found in this category
             </div>
           )}
         </div>

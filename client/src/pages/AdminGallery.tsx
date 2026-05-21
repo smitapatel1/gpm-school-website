@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Trash2, Upload, Loader2, X, Image as ImageIcon } from "lucide-react";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { collection, getDocs, addDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface GalleryImage {
   id: string;
@@ -22,7 +23,9 @@ export default function AdminGallery() {
     title: "",
     category: "events",
     imageUrl: "",
+    imageFile: null as File | null,
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
@@ -45,21 +48,70 @@ export default function AdminGallery() {
     }
   };
 
+  const handleFileChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file");
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, imageFile: file }));
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
       setUploading(true);
+      let imageUrl = formData.imageUrl;
+      let imagePath = "";
+
+      // Upload file to Firebase Storage if provided
+      if (formData.imageFile) {
+        const timestamp = Date.now();
+        const fileName = `gallery/${formData.category}/${timestamp}_${formData.imageFile.name}`;
+        const storageRef = ref(storage, fileName);
+        await uploadBytes(storageRef, formData.imageFile);
+        imageUrl = await getDownloadURL(storageRef);
+        imagePath = fileName;
+      }
+
+      if (!imageUrl) {
+        alert("Please provide either an image file or URL");
+        setUploading(false);
+        return;
+      }
+
       const docRef = await addDoc(collection(db, "gallery"), {
-        ...formData,
+        title: formData.title,
+        category: formData.category,
+        imageUrl,
+        imagePath,
         uploadedAt: Timestamp.now(),
       });
       setGallery((prev) => [
-        { id: docRef.id, ...formData, uploadedAt: Timestamp.now() },
+        {
+          id: docRef.id,
+          title: formData.title,
+          category: formData.category,
+          imageUrl,
+          uploadedAt: Timestamp.now(),
+        },
         ...prev,
       ]);
       resetForm();
     } catch (error) {
       console.error("Error uploading image:", error);
+      alert("Error uploading image. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -77,7 +129,8 @@ export default function AdminGallery() {
   };
 
   const resetForm = () => {
-    setFormData({ title: "", category: "events", imageUrl: "" });
+    setFormData({ title: "", category: "events", imageUrl: "", imageFile: null });
+    setImagePreview(null);
     setShowForm(false);
   };
 
@@ -127,7 +180,7 @@ export default function AdminGallery() {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-[#3E2723]">Add Image to Gallery</h3>
               <button onClick={resetForm} className="text-[#6B7280] hover:text-[#3E2723]">
@@ -138,7 +191,7 @@ export default function AdminGallery() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-[#3E2723] mb-1">
-                  Title
+                  Title *
                 </label>
                 <input
                   type="text"
@@ -146,12 +199,13 @@ export default function AdminGallery() {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
                   className="w-full px-3 py-2 border border-[#D6D6D6] rounded-lg focus:outline-none focus:border-[#C62828]"
+                  placeholder="Image title"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-[#3E2723] mb-1">
-                  Category
+                  Category *
                 </label>
                 <select
                   value={formData.category}
@@ -168,18 +222,53 @@ export default function AdminGallery() {
 
               <div>
                 <label className="block text-sm font-semibold text-[#3E2723] mb-1">
-                  Image URL
+                  Upload Image File
+                </label>
+                {imagePreview ? (
+                  <div className="relative inline-block w-full">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-lg border-2 border-[#C62828]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({ ...prev, imageFile: null }));
+                        setImagePreview(null);
+                      }}
+                      className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full px-4 py-6 border-2 border-dashed border-[#D6D6D6] rounded-lg cursor-pointer hover:border-[#C62828] hover:bg-[#FFF8E1] transition-colors">
+                    <Upload size={24} className="text-[#C62828] mb-2" />
+                    <span className="text-sm font-medium text-[#3E2723]">Click to upload image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#3E2723] mb-1">
+                  Or Image URL (optional)
                 </label>
                 <input
                   type="url"
                   value={formData.imageUrl}
                   onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  required
                   placeholder="https://example.com/image.jpg"
                   className="w-full px-3 py-2 border border-[#D6D6D6] rounded-lg focus:outline-none focus:border-[#C62828]"
                 />
                 <p className="text-xs text-[#6B7280] mt-2">
-                  Upload your image to Firebase Storage or use an external image URL
+                  Use either file upload or external URL
                 </p>
               </div>
 

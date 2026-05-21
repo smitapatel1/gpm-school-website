@@ -1,52 +1,70 @@
 import { useState, useEffect } from "react";
-import { Download, Calendar, Tag, Search } from "lucide-react";
+import { Download, Calendar, Tag, Search, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { setSEOTags, pageConfig } from "@/lib/seo";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function Notices() {
   const [notices, setNotices] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setSEOTags(pageConfig.notices);
-    // TODO: Fetch notices from Firestore
+    fetchNotices();
   }, []);
 
-  // Placeholder notices
+  const fetchNotices = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "notices"));
+      const data: any[] = [];
+      querySnapshot.forEach((doc) => {
+        data.push({ id: doc.id, ...doc.data() });
+      });
+      setNotices(data.sort((a, b) => b.date?.toDate?.() - a.date?.toDate?.() || 0));
+    } catch (error) {
+      console.error("Error fetching notices:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Placeholder notices for when no real data exists
   const placeholderNotices = [
     {
-      id: 1,
+      id: "1",
       title: "Annual Examination Schedule",
       category: "academic",
       date: new Date("2026-05-20"),
       description: "Final examination schedule for all classes",
-      pdfUrl: "#",
+      pdfUrl: "",
     },
     {
-      id: 2,
+      id: "2",
       title: "School Holiday Announcement",
       category: "general",
       date: new Date("2026-05-15"),
       description: "School will remain closed for summer vacation",
-      pdfUrl: "#",
+      pdfUrl: "",
     },
     {
-      id: 3,
+      id: "3",
       title: "Admission Form Distribution",
       category: "admission",
       date: new Date("2026-05-10"),
       description: "Admission forms for next academic year are now available",
-      pdfUrl: "#",
+      pdfUrl: "",
     },
     {
-      id: 4,
+      id: "4",
       title: "Sports Day Participation",
       category: "event",
       date: new Date("2026-05-05"),
       description: "All students must participate in the annual sports day",
-      pdfUrl: "#",
+      pdfUrl: "",
     },
   ];
 
@@ -70,6 +88,21 @@ export default function Notices() {
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+  if (loading && notices.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#FFFDF7]">
+        <Navbar />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Loader2 className="animate-spin h-12 w-12 text-[#C62828] mx-auto mb-4" />
+            <p className="text-[#6B7280]">Loading notices...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FFFDF7]">
       <Navbar />
@@ -78,136 +111,93 @@ export default function Notices() {
       <section className="bg-gradient-to-br from-[#C62828] to-[#E53935] text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Notices & Circulars</h1>
-          <p className="text-lg text-white/90">
-            Important announcements and updates from the school
+          <p className="text-lg text-white/90 max-w-2xl">
+            Stay updated with the latest school announcements, schedules, and important circulars
           </p>
         </div>
       </section>
 
-      {/* Search and Filter */}
-      <section className="py-12 bg-white border-b border-[#D6D6D6]">
+      {/* Main Content */}
+      <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           {/* Search Bar */}
           <div className="mb-8">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280]" size={20} />
+              <Search className="absolute left-4 top-3.5 text-[#6B7280]" size={20} />
               <input
                 type="text"
                 placeholder="Search notices..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-[#D6D6D6] rounded-lg focus:outline-none focus:border-[#C62828] transition-colors"
+                className="w-full pl-12 pr-4 py-3 border border-[#D6D6D6] rounded-lg focus:outline-none focus:border-[#C62828]"
               />
             </div>
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-2">
+          <div className="mb-8 flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   selectedCategory === cat.id
                     ? "bg-[#C62828] text-white"
-                    : "bg-[#FFF8E1] text-[#3E2723] hover:bg-[#E8D6B3]"
+                    : "bg-white border border-[#D6D6D6] text-[#3E2723] hover:border-[#C62828]"
                 }`}
               >
                 {cat.label}
               </button>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Notices List */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4">
-          {filteredNotices.length > 0 ? (
-            <div className="space-y-6">
+          {/* Notices List */}
+          {filteredNotices.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-[#6B7280] text-lg">No notices found</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
               {filteredNotices.map((notice) => (
                 <div
                   key={notice.id}
-                  className="card-base p-6 hover:shadow-lg transition-all duration-300"
+                  className="bg-white rounded-lg p-6 border border-[#D6D6D6] hover:shadow-md transition-shadow"
                 >
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    {/* Content */}
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="inline-block px-3 py-1 bg-[#FFF8E1] text-[#C62828] text-xs font-bold rounded-full">
-                          {categories.find((c) => c.id === notice.category)?.label}
+                      <h3 className="text-xl font-bold text-[#3E2723] mb-2">{notice.title}</h3>
+                      <p className="text-[#6B7280] mb-4">{notice.description}</p>
+
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <span className="inline-flex items-center gap-1 text-sm text-[#6B7280]">
+                          <Calendar size={16} />
+                          {notice.date instanceof Date
+                            ? notice.date.toLocaleDateString()
+                            : new Date(notice.date?.toDate?.() || notice.date).toLocaleDateString()}
                         </span>
-                        <div className="flex items-center gap-1 text-sm text-[#6B7280]">
-                          <Calendar size={14} />
-                          {notice.date.toLocaleDateString()}
-                        </div>
+
+                        <span className="px-3 py-1 bg-[#FFF8E1] text-[#C62828] rounded-full text-xs font-semibold capitalize">
+                          {notice.category}
+                        </span>
+
+                        {notice.pdfUrl && (
+                          <a
+                            href={notice.pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            <Download size={16} />
+                            Download PDF
+                          </a>
+                        )}
                       </div>
-
-                      <h3 className="text-xl font-bold text-[#3E2723] mb-2">
-                        {notice.title}
-                      </h3>
-                      <p className="text-[#6B7280] leading-relaxed">
-                        {notice.description}
-                      </p>
                     </div>
-
-                    {/* Download Button */}
-                    <button
-                      onClick={() => {
-                        if (notice.pdfUrl && notice.pdfUrl !== "#") {
-                          const link = document.createElement("a");
-                          link.href = notice.pdfUrl;
-                          link.setAttribute("download", "");
-                          link.click();
-                        }
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium whitespace-nowrap"
-                    >
-                      <Download size={18} />
-                      <span className="hidden sm:inline">Download PDF</span>
-                      <span className="sm:hidden">PDF</span>
-                    </button>
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-16 text-[#6B7280]">
-              <p className="text-lg">No notices found matching your search</p>
-            </div>
           )}
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-16 md:py-24 bg-[#FFF8E1]">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-[#C62828] mb-2">
-                {displayNotices.length}
-              </div>
-              <p className="text-[#6B7280]">Total Notices</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-[#C62828] mb-2">
-                {displayNotices.filter((n) => n.category === "academic").length}
-              </div>
-              <p className="text-[#6B7280]">Academic</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-[#C62828] mb-2">
-                {displayNotices.filter((n) => n.category === "admission").length}
-              </div>
-              <p className="text-[#6B7280]">Admission</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-[#C62828] mb-2">
-                {displayNotices.filter((n) => n.category === "event").length}
-              </div>
-              <p className="text-[#6B7280]">Events</p>
-            </div>
-          </div>
         </div>
       </section>
 

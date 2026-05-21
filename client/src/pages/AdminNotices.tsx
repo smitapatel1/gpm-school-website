@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Trash2, Edit2, Plus, Loader2, X } from "lucide-react";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface Notice {
   id: string;
@@ -9,8 +10,11 @@ interface Notice {
   description: string;
   category: string;
   pdfUrl?: string;
+  pdfPath?: string;
+  pdfName?: string;
   date: any;
-  createdAt: any;
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 export default function AdminNotices() {
@@ -23,7 +27,9 @@ export default function AdminNotices() {
     description: "",
     category: "general",
     pdfUrl: "",
+    pdfFile: null as File | null,
   });
+  const [uploading, setUploading] = useState(false);
 
   const categories = ["academic", "admission", "event", "general"];
 
@@ -47,36 +53,69 @@ export default function AdminNotices() {
     }
   };
 
+  const handlePdfChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type and size
+    if (file.type !== "application/pdf") {
+      alert("Please select a valid PDF file");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("PDF file size must be less than 10 MB");
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, pdfFile: file }));
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
+      setUploading(true);
+      let pdfUrl = formData.pdfUrl;
+      let pdfPath = "";
+      let pdfName = "";
+
+      // Upload PDF to Firebase Storage if provided
+      if (formData.pdfFile) {
+        const timestamp = Date.now();
+        pdfName = formData.pdfFile.name;
+        pdfPath = `notices/${formData.category}/${timestamp}_${pdfName}`;
+        const storageRef = ref(storage, pdfPath);
+        await uploadBytes(storageRef, formData.pdfFile);
+        pdfUrl = await getDownloadURL(storageRef);
+      }
+
+      const noticeData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        ...(pdfUrl && { pdfUrl, pdfPath, pdfName }),
+        date: Timestamp.now(),
+        ...(editingId ? { updatedAt: Timestamp.now() } : { createdAt: Timestamp.now() }),
+      };
+
       if (editingId) {
-        await updateDoc(doc(db, "notices", editingId), {
-          ...formData,
-          date: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        });
+        await updateDoc(doc(db, "notices", editingId), noticeData);
         setNotices((prev) =>
-          prev.map((n) =>
-            n.id === editingId
-              ? { ...n, ...formData, date: Timestamp.now() }
-              : n
-          )
+          prev.map((n) => (n.id === editingId ? { ...n, ...noticeData } : n))
         );
       } else {
-        const docRef = await addDoc(collection(db, "notices"), {
-          ...formData,
-          date: Timestamp.now(),
-          createdAt: Timestamp.now(),
-        });
+        const docRef = await addDoc(collection(db, "notices"), noticeData);
         setNotices((prev) => [
-          { id: docRef.id, ...formData, date: Timestamp.now(), createdAt: Timestamp.now() },
+          { id: docRef.id, ...noticeData },
           ...prev,
         ]);
       }
       resetForm();
     } catch (error) {
       console.error("Error saving notice:", error);
+      alert("Error saving notice. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -97,13 +136,14 @@ export default function AdminNotices() {
       description: notice.description,
       category: notice.category,
       pdfUrl: notice.pdfUrl || "",
+      pdfFile: null,
     });
     setEditingId(notice.id);
     setShowForm(true);
   };
 
   const resetForm = () => {
-    setFormData({ title: "", description: "", category: "general", pdfUrl: "" });
+    setFormData({ title: "", description: "", category: "general", pdfUrl: "", pdfFile: null });
     setEditingId(null);
     setShowForm(false);
   };
@@ -178,7 +218,24 @@ export default function AdminNotices() {
 
               <div>
                 <label className="block text-sm font-semibold text-[#3E2723] mb-1">
-                  PDF URL (optional)
+                  Upload PDF File (optional)
+                </label>
+                <label className="flex flex-col items-center justify-center w-full px-4 py-3 border-2 border-dashed border-[#D6D6D6] rounded-lg cursor-pointer hover:border-[#C62828] hover:bg-[#FFF8E1] transition-colors">
+                  <span className="text-sm font-medium text-[#3E2723]">
+                    {formData.pdfFile ? formData.pdfFile.name : "Click to upload PDF"}
+                  </span>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handlePdfChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#3E2723] mb-1">
+                  Or PDF URL (optional)
                 </label>
                 <input
                   type="url"
@@ -199,9 +256,10 @@ export default function AdminNotices() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium"
+                  disabled={uploading}
+                  className="flex-1 px-4 py-2 bg-[#C62828] text-white rounded-lg hover:bg-[#E53935] transition-colors font-medium disabled:opacity-50"
                 >
-                  {editingId ? "Update" : "Create"}
+                  {uploading ? "Uploading..." : editingId ? "Update" : "Create"}
                 </button>
               </div>
             </form>

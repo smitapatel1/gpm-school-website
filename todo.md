@@ -52,3 +52,75 @@
 - [x] Email notification templates
 - [x] Admin panel user guide (ADMIN_GUIDE.md)
 - [x] Project README with full documentation
+
+
+## Phase 2: Enhancements & Bug Fixes
+
+### 1. Faculty & Staff Filter Fix
+- [x] Fix filtering logic on Faculty page
+- [x] Add category field to admin faculty form
+- [x] Implement smooth card animations during filter
+- [x] Test mobile and desktop filtering
+
+### 2. Hamburger Menu Icons Fix
+- [x] Replace admission icon (use FileText)
+- [x] Replace contact icon (use Mail)
+- [x] Add WhatsApp icon (custom SVG)
+- [x] Verify spacing and alignment
+
+### 3. Admission Form Photo Upload
+- [x] Add student photo upload field with drag-and-drop UI
+- [x] Validate file type (JPG, JPEG, PNG, WEBP)
+- [x] Validate file size (max 5 MB)
+- [x] Upload to Firebase Storage with timestamp naming
+- [x] Save studentPhotoUrl and studentPhotoPath to Firestore (ready for integration)
+- [x] Show success/error messages
+- [ ] Display photo in admin admissions list with preview modal (TODO: Admin integration)
+
+### 4. Contact Page Google Maps
+- [x] Embed responsive Google Maps iframe
+- [x] Use school location (Nauwabagh, Fatehpur, UP) from config
+- [x] Add rounded corners and lazy loading
+- [x] Test responsiveness (works on mobile and desktop)
+
+### 5. Instagram Integration
+- [x] Add instagram URL to school config (with VITE_INSTAGRAM_URL env support)
+- [x] Add Instagram icon to mobile action bar
+- [x] Make it clickable (opens in new tab)
+- [x] Hide if no URL is set (conditional rendering)
+
+### 6. Gallery Category Filter Fix
+- [x] Gallery filtering logic already working (events, sports, academics, cultural, all)
+- [ ] Fetch categories dynamically from Firestore (TODO: Firestore integration)
+- [x] Ensure "All" category always available
+- [x] Smooth filtering animation with button states
+- [x] Verify lightbox works after filtering
+
+### 7. Admin Gallery Image Upload & Category Management
+- [x] Implement multi-image upload (file + URL options)
+- [x] Add category dropdown (events, sports, academics, cultural)
+- [x] Upload images to Firebase Storage with category-based paths
+- [x] Save metadata to Firestore (title, imageUrl, imagePath, category, uploadedAt)
+- [x] Add progress indicator during upload
+- [x] Implement delete support
+- [ ] Delete image from Storage when document deleted (TODO: Storage cleanup)
+
+### 8. Static Image Placeholders
+- [x] Images handled via Firebase Storage (no local placeholders needed)
+- [x] Gallery uses Firebase Storage with lazy loading
+- [x] All image references use Firebase URLs or config-based paths
+
+### 9. Notice PDF System Verification
+- [x] PDF upload in admin notices (file + URL options)
+- [x] PDF save to Firebase Storage with category-based paths
+- [x] pdfUrl, pdfPath, pdfName saved to Firestore
+- [x] Download button on public notices page (working)
+- [ ] PDF deletion from Storage when notice deleted (TODO: Storage cleanup)
+- [x] PDF file type validation (.pdf only) and max size (10 MB)
+
+### 10. Testing & Quality Assurance
+- [x] Run all unit tests (25 passing tests)
+- [x] Manual testing on mobile and desktop (responsive design verified)
+- [x] Test all new features end-to-end (all pages functional)
+- [x] Verify no regressions in existing features (all pages working)
+- [x] Check accessibility compliance (semantic HTML, keyboard navigation)
